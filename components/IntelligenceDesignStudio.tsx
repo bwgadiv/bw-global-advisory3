@@ -2,10 +2,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ReportParameters, UserProfile, StrategicIntent, SkillLevel } from '../types';
 import { ORGANIZATION_TYPES, STRATEGIC_INTENTS, REGIONS_AND_COUNTRIES, ORGANIZATION_SUBTYPES } from '../constants';
-import { NexusLogo, Target, BrainCircuit, GlobeIcon, Users, FileText, LetterIcon, Layers, CheckCircle, RocketIcon, ShieldCheck, ActivityIcon, ManualIcon, PlusCircleIcon, CloseIcon, SlidersIcon, TrashIcon } from './Icons';
+import { NexusLogo, Target, BrainCircuit, GlobeIcon, Users, FileText, LetterIcon, Layers, CheckCircle, RocketIcon, ShieldCheck, ActivityIcon, ManualIcon, PlusCircleIcon, CloseIcon, SlidersIcon, TrashIcon, MatchMakerIcon } from './Icons';
 import { StrategicCanvas } from './StrategicCanvas';
 import { generateFastSuggestion } from '../services/nexusService';
 import Inquire from './Inquire';
+import MatchmakingEngine from './MatchmakingEngine';
+import PartnerIntelligenceDashboard from './PartnerIntelligenceDashboard';
 
 interface DesignStudioProps {
     params: ReportParameters;
@@ -13,7 +15,7 @@ interface DesignStudioProps {
     onProfileUpdate: (profile: UserProfile) => void;
 }
 
-type StudioStage = 'identity' | 'intent' | 'canvas';
+type StudioStage = 'identity' | 'intent' | 'discovery' | 'canvas';
 
 // Enhanced Metadata with 10+ features per module
 const MODULE_META: Record<string, { title: string, description: string, features: string[] }> = {
@@ -349,6 +351,10 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
 
         return Array.from(finalSet);
     }, [params.selectedIntents, moduleOverrides]);
+
+    const handleProceedToDiscovery = () => {
+        setStage('discovery');
+    };
 
     const handleProceedToCanvas = () => {
         if (!params.problemStatement && params.selectedIntents && params.selectedIntents.length > 0) {
@@ -900,11 +906,11 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                         
                         <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
                                 <button 
-                                onClick={handleProceedToCanvas}
+                                onClick={handleProceedToDiscovery}
                                 disabled={!hasSelected}
                                 className="w-full group relative px-8 py-4 bg-slate-900 text-white font-bold text-sm tracking-widest uppercase rounded hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-3"
                             >
-                                Initialize Strategic Canvas
+                                Confirm & Begin Discovery
                                 <span className="group-hover:translate-x-1 transition-transform">→</span>
                             </button>
                         </div>
@@ -914,14 +920,107 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
         );
     }
 
-    // STAGE 3: STRATEGIC CANVAS
+    // STAGE 3 (NEW): STRATEGIC DISCOVERY & ANALYSIS
+    if (stage === 'discovery') {
+        return (
+            <div className="h-full w-full bg-slate-100 font-sans overflow-y-auto" id="studio-scroll-container">
+                <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div>
+                            <button onClick={() => setStage('intent')} className="text-xs font-bold text-slate-400 hover:text-slate-900 uppercase tracking-widest mb-2 transition-colors">← Back to Intent</button>
+                            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+                                <MatchMakerIcon className="w-8 h-8 text-blue-600" />
+                                Strategic Discovery
+                            </h1>
+                            <p className="text-sm text-slate-600 mt-1">
+                                Preliminary target assessment and early matchmaking scan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {/* Column 1: Target Viability & Profile */}
+                        <div className="md:col-span-1 space-y-6">
+                            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                <div className="bg-slate-50 px-4 py-3 border-b border-slate-200">
+                                    <h3 className="font-bold text-sm text-slate-800 uppercase tracking-wide">Target Assessment</h3>
+                                </div>
+                                <div className="p-4">
+                                    {params.targetPartner ? (
+                                        <PartnerIntelligenceDashboard params={params} compact={true} />
+                                    ) : (
+                                        <div className="text-center py-8 text-slate-400">
+                                            <p className="text-xs italic mb-4">No specific partner targeted yet.</p>
+                                            <div className="p-3 bg-yellow-50 rounded border border-yellow-100 text-yellow-800 text-xs text-left">
+                                                <strong>Strategic Fit Rating:</strong> Pending Selection
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                                <h3 className="font-bold text-sm text-slate-900 mb-4">Mission Viability Gauge</h3>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-bold text-slate-500">Risk</span>
+                                    <span className="text-xs font-bold text-slate-500">Reward</span>
+                                </div>
+                                <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                                    <div className="w-1/3 bg-red-400"></div>
+                                    <div className="w-1/3 bg-yellow-400"></div>
+                                    <div className="w-1/3 bg-green-500"></div>
+                                </div>
+                                <div className="mt-2 flex justify-center">
+                                    <span className="text-xs font-bold px-3 py-1 bg-green-100 text-green-800 rounded-full border border-green-200">High Potential</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-4 text-center leading-relaxed">
+                                    Preliminary scan suggests high compatibility with {params.region} market dynamics.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Column 2 & 3: Automated Matchmaking */}
+                        <div className="md:col-span-2 space-y-6">
+                            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                                <h3 className="font-bold text-lg text-slate-900 mb-2">Opportunity Scan</h3>
+                                <p className="text-xs text-slate-500 mb-6">
+                                    Identifying asymmetric opportunities based on your profile ({params.organizationType}) and region ({params.region}).
+                                </p>
+                                <MatchmakingEngine 
+                                    params={params} 
+                                    autoRun={true} 
+                                    compact={true}
+                                    onMatchesFound={(matches) => {
+                                        // Optional: Could auto-select best match
+                                        console.log("Early matches found:", matches);
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-6 border-t border-slate-200">
+                        <button 
+                            onClick={handleProceedToCanvas}
+                            className="group relative px-8 py-4 bg-slate-900 text-white font-bold text-sm tracking-widest uppercase rounded hover:bg-slate-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-3"
+                        >
+                            Initialize Full Strategic Canvas
+                            <span className="group-hover:translate-x-1 transition-transform">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // STAGE 4: STRATEGIC CANVAS
     return (
         <div className="flex h-full w-full bg-slate-100 overflow-hidden">
             <div className="flex-1 flex flex-col h-full overflow-hidden relative">
                 <StrategicCanvas 
                     params={{...params, analyticalModules: activeEngines}} // Force pass the active list
                     onParamsChange={onParamsChange}
-                    onBack={() => setStage('intent')}
+                    onBack={() => setStage('discovery')}
                 />
             </div>
             {/* Persistent AI Co-Pilot */}

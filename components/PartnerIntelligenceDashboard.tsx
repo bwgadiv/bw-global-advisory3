@@ -37,11 +37,13 @@ interface PartnerProfile {
 interface PartnerIntelligenceDashboardProps {
   params: Partial<ReportParameters>;
   onPartnerSelect?: (partner: PartnerProfile) => void;
+  compact?: boolean;
 }
 
 const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> = ({
   params,
-  onPartnerSelect
+  onPartnerSelect,
+  compact = false
 }) => {
   const [partners, setPartners] = useState<PartnerProfile[]>([]);
   const [selectedPartner, setSelectedPartner] = useState<PartnerProfile | null>(null);
@@ -155,6 +157,29 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
       default: return 'text-slate-400';
     }
   };
+
+  if (compact) {
+      return (
+          <div className="space-y-3">
+              {filteredPartners.slice(0, 2).map(partner => (
+                  <div key={partner.id} className="bg-white border border-slate-200 rounded p-3 flex justify-between items-center hover:border-slate-400 cursor-pointer transition-all">
+                      <div>
+                          <h4 className="text-sm font-bold text-slate-900">{partner.name}</h4>
+                          <div className="flex gap-2 mt-1">
+                              <span className="text-[10px] uppercase bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{partner.type}</span>
+                              <span className={`text-[10px] font-bold uppercase ${getRiskColor(partner.riskFactors[0]?.level)}`}>
+                                  {partner.riskFactors[0]?.level} Risk
+                              </span>
+                          </div>
+                      </div>
+                      <div className={`text-xl font-bold ${getCredibilityColor(partner.credibilityScore)}`}>
+                          {partner.credibilityScore}
+                      </div>
+                  </div>
+              ))}
+          </div>
+      );
+  }
 
   return (
     <div className="partner-intelligence-dashboard space-y-6 text-slate-900">
