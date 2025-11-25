@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ReportParameters, UserProfile, StrategicIntent, SkillLevel } from '../types';
 import { ORGANIZATION_TYPES, STRATEGIC_INTENTS, REGIONS_AND_COUNTRIES, ORGANIZATION_SUBTYPES } from '../constants';
-import { NexusLogo, Target, BrainCircuit, GlobeIcon, Users, FileText, LetterIcon, Layers, CheckCircle, RocketIcon, ShieldCheck, ActivityIcon, ManualIcon, PlusCircleIcon, CloseIcon } from './Icons';
+import { NexusLogo, Target, BrainCircuit, GlobeIcon, Users, FileText, LetterIcon, Layers, CheckCircle, RocketIcon, ShieldCheck, ActivityIcon, ManualIcon, PlusCircleIcon, CloseIcon, SlidersIcon, TrashIcon } from './Icons';
 import { StrategicCanvas } from './StrategicCanvas';
 import { generateFastSuggestion } from '../services/nexusService';
 import Inquire from './Inquire';
@@ -15,28 +15,188 @@ interface DesignStudioProps {
 
 type StudioStage = 'identity' | 'intent' | 'canvas';
 
-// Enhanced Metadata for Modules to fill the "Gap" with added extras
+// Enhanced Metadata with 10+ features per module
 const MODULE_META: Record<string, { title: string, description: string, features: string[] }> = {
-    'geopolitics': { title: 'Geopolitical Forecast', description: 'Macro-stability & risk analysis.', features: ['Regime Stability', 'Currency Risk', 'Trade Barriers'] },
-    'rroi': { title: 'RROI Diagnostic', description: 'Regional Readiness Index.', features: ['Infrastructure', 'Talent', 'Regulatory Friction'] },
-    'comfort_index': { title: 'Regional Comfort Index', description: 'Safety & lifestyle metrics.', features: ['Crime Stats', 'Expat Quality', 'Healthcare'] },
-    'math_models': { title: 'Math Models Engine', description: 'Quantitative economic modeling.', features: ['Gravity Model', 'Location Quotient', 'MCDA'] },
-    'rocket_engine': { title: 'Nexus Rocket Engine', description: 'High-velocity asset identification.', features: ['Latent Assets', 'IVAS Score', 'Cascade Forecast'] },
-    'governance_audit': { title: 'Governance Audit', description: 'Institutional integrity check.', features: ['Corruption Risk', 'Rule of Law', 'Compliance'] },
-    'due_diligence': { title: 'Due Diligence Suite', description: 'Partner background verification.', features: ['Legal Check', 'Financial Health', 'Reputation'] },
-    'symbiotic_matchmaking': { title: 'Symbiotic Discovery', description: 'Asymmetric value pairing.', features: ['Cross-Sector', 'Hidden Gems', 'Value Arbitrage'] },
-    'matchmaking_engine': { title: 'Matchmaking Engine', description: 'Standard partner search.', features: ['Capability Match', 'Size Fit', 'Geo-Targeting'] },
-    'seam': { title: 'Ecosystem Mapping', description: 'Strategic alignment map.', features: ['Supply Chain', 'Institutions', 'Talent Pools'] },
-    'partner_intel': { title: 'Partner Intelligence', description: 'Deep profile analysis.', features: ['Track Record', 'Decision Structure', 'Network'] },
-    'deep_reasoning': { title: 'Deep Reasoning Engine', description: 'Logic & strategy validation.', features: ['Deal Killers', 'Counter-Intuition', 'Hidden Value'] },
-    'trade_disruption': { title: 'Trade Simulation', description: 'Scenario planning & shock tests.', features: ['Tariff Impact', 'Supply Shock', 'Route Risk'] },
-    'predictive_growth': { title: 'Predictive Growth', description: 'Future market modeling.', features: ['GDP Forecast', 'Sector Trends', 'Demographics'] },
-    'alternative_locations': { title: 'Alt. Location Matcher', description: 'Site selection comparison.', features: ['Cost-Benefit', 'Talent Depth', 'Logistics'] },
-    'cultural_intel': { title: 'Cultural Intelligence', description: 'Soft power strategy.', features: ['Negotiation Style', 'Etiquette', 'Taboos'] },
-    'negotiation_advantage': { title: 'Negotiation Advantage', description: 'Leverage & BATNA analysis.', features: ['Leverage Points', 'Objection Handling', 'Closing'] },
-    'stakeholder_analysis': { title: 'Stakeholder Map', description: 'Influence & interest mapping.', features: ['Key Players', 'Interests', 'Power Dynamics'] },
-    'relationship_builder': { title: 'Relationship Strategy', description: 'Long-term engagement plan.', features: ['Trust Building', 'Communication', 'Milestones'] },
-    'final_review': { title: 'Final Dossier', description: 'Synthesis & Export.', features: ['Executive Summary', 'Full Report', 'Audio Brief'] }
+    'geopolitics': { 
+        title: 'Geopolitical Forecast', 
+        description: 'Macro-stability & risk analysis.', 
+        features: [
+            'Regime Stability Analysis', 'Currency Volatility Risk', 'Trade Barrier Forecast', 'Sanctions Screening', 
+            'Election Impact Modeling', 'Border Security Assessment', 'Regional Conflict Probability', 'Policy Continuity Check', 
+            'Sovereign Debt Risk', 'Labor Unrest Prediction', 'Diplomatic Relation Strength', 'Regulatory Shift Warning'
+        ] 
+    },
+    'rroi': { 
+        title: 'RROI Diagnostic', 
+        description: 'Regional Readiness Index.', 
+        features: [
+            'Infrastructure Quality Score', 'Talent Pool Availability', 'Regulatory Friction Index', 'Digital Connectivity Speed',
+            'Energy Reliability Audit', 'Water Security Assessment', 'Logistics Performance Index', 'Innovation Ecosystem Score',
+            'Cost of Living Baseline', 'Tax Efficiency Rating', 'IP Protection Level', 'Market Entry Speed'
+        ] 
+    },
+    'comfort_index': { 
+        title: 'Regional Comfort Index', 
+        description: 'Safety & lifestyle metrics.', 
+        features: [
+            'Violent Crime Statistics', 'Expat Quality of Life', 'Healthcare Access & Quality', 'International Schooling',
+            'Air & Water Quality', 'Cultural Openness Index', 'Housing Availability', 'Personal Freedom Score',
+            'Banking Accessibility', 'Language Barrier Assessment', 'Transport Safety Record', 'Emergency Response Times'
+        ] 
+    },
+    'math_models': { 
+        title: 'Math Models Engine', 
+        description: 'Quantitative economic modeling.', 
+        features: [
+            'Gravity Model of Trade', 'Location Quotient (LQ)', 'Multi-Criteria Decision Analysis', 'Input-Output Modeling',
+            'Economic Base Analysis', 'Shift-Share Analysis', 'Cluster Mapping', 'Supply Chain Network Optimization',
+            'Cost-Benefit Analysis', 'Sensitivity Analysis', 'Monte Carlo Simulation'
+        ] 
+    },
+    'rocket_engine': { 
+        title: 'Nexus Rocket Engine', 
+        description: 'High-velocity asset identification.', 
+        features: [
+            'Latent Asset Identification (LAI)', 'Investment Velocity Score (IVAS)', 'Symbiotic Cascade Forecast', 'Hidden Asset Scanning',
+            'Cross-Domain Synergy Check', 'Underutilized Resource Map', 'Rapid Feasibility Test', 'Economic Multiplier Calc',
+            'Speed-to-Activation Estimate', 'Catalyst Event Identification'
+        ] 
+    },
+    'governance_audit': { 
+        title: 'Governance Audit', 
+        description: 'Institutional integrity check.', 
+        features: [
+            'Corruption Risk Index', 'Rule of Law Assessment', 'Regulatory Enforcement Consistency', 'Contract Enforcement Speed',
+            'Corporate Governance Standards', 'Anti-Money Laundering (AML)', 'Political Interference Check', 'Judicial Independence',
+            'Transparency International Rating', 'Bureaucratic Efficiency', 'Property Rights Protection'
+        ] 
+    },
+    'due_diligence': { 
+        title: 'Due Diligence Suite', 
+        description: 'Partner background verification.', 
+        features: [
+            'Ultimate Beneficial Owner (UBO)', 'Financial Health Check', 'Legal Litigation History', 'Reputational Risk Scan',
+            'Sanctions List Screening', 'PEP (Politically Exposed) Check', 'Adverse Media Search', 'Operational History',
+            'ESG Compliance Verification', 'Creditworthiness Assessment', 'Partnership Network Map'
+        ] 
+    },
+    'symbiotic_matchmaking': { 
+        title: 'Symbiotic Discovery', 
+        description: 'Asymmetric value pairing.', 
+        features: [
+            'Cross-Sector Opportunity Scan', 'Asymmetric Value Identification', 'Hidden Gem Detection', 'Value Arbitrage Calculation',
+            'Complementary Asset Matching', 'Cultural Fit Prediction', 'Strategic Gap Filling', 'Resource Exchange Modeling',
+            'Innovation Synergy Check', 'Long-term Alignment Score'
+        ] 
+    },
+    'matchmaking_engine': { 
+        title: 'Matchmaking Engine', 
+        description: 'Standard partner search.', 
+        features: [
+            'Capability Matching', 'Size & Scale Fit', 'Geographic Targeting', 'Industry Vertical Align',
+            'Technology Stack Match', 'Supply Chain Integration', 'Distribution Network Fit', 'Revenue Band Filtering',
+            'Ownership Structure Match', 'Certification Alignment'
+        ] 
+    },
+    'seam': { 
+        title: 'Ecosystem Mapping', 
+        description: 'Strategic alignment map.', 
+        features: [
+            'Supply Chain Node Mapping', 'Institutional Support Map', 'Talent Pool Clusters', 'Competitor Proximity',
+            'Logistics Hub Alignment', 'R&D Center Proximity', 'Government Agency Access', 'Financial Service Density',
+            'Innovation Hub Access', 'Utility Infrastructure Map'
+        ] 
+    },
+    'partner_intel': { 
+        title: 'Partner Intelligence', 
+        description: 'Deep profile analysis.', 
+        features: [
+            'Historical Track Record', 'Decision Making Structure', 'Key Stakeholder Network', 'Financial Performance Trends',
+            'Strategic Priority Analysis', 'Operational Footprint', 'Technology Maturity', 'Workforce Culture',
+            'Market Reputation Analysis', 'Negotiation History'
+        ] 
+    },
+    'deep_reasoning': { 
+        title: 'Deep Reasoning Engine', 
+        description: 'Logic & strategy validation.', 
+        features: [
+            'Deal Killer Identification', 'Counter-Intuitive Insights', 'Hidden Value Detection', 'Adversarial Stress Testing',
+            'Logical Fallacy Check', 'Strategic Blindspot Scan', 'Second-Order Effect Analysis', 'Bias Mitigation',
+            'Alternative Scenario Logic', 'Decision Robustness Score'
+        ] 
+    },
+    'trade_disruption': { 
+        title: 'Trade Simulation', 
+        description: 'Scenario planning & shock tests.', 
+        features: [
+            'Tariff Impact Simulation', 'Supply Chain Shock Test', 'Route Disruption Analysis', 'Commodity Price Volatility',
+            'Currency Fluctuation Impact', 'Trade War Scenario', 'Pandemic/Health Crisis Sim', 'Cyber Attack Resilience',
+            'Regulatory Embargo Effect', 'Alternative Sourcing Speed'
+        ] 
+    },
+    'predictive_growth': { 
+        title: 'Predictive Growth', 
+        description: 'Future market modeling.', 
+        features: [
+            'GDP Growth Forecast', 'Sector Trend Extrapolation', 'Demographic Shift Modeling', 'Urbanization Rate Projection',
+            'Consumer Spending Forecast', 'Technology Adoption Curve', 'Infrastructure ROI Model', 'Inflation Impact Projection',
+            'Labor Market Evolution', 'Market Saturation Timeline'
+        ] 
+    },
+    'alternative_locations': { 
+        title: 'Alt. Location Matcher', 
+        description: 'Site selection comparison.', 
+        features: [
+            'Cost-Benefit Comparison', 'Talent Depth Analysis', 'Logistics Efficiency Score', 'Incentive Package Comparison',
+            'Quality of Life Match', 'Risk Profile Comparison', 'Market Access Proximity', 'Real Estate Availability',
+            'Utility Cost Comparison', 'Time Zone Alignment'
+        ] 
+    },
+    'cultural_intel': { 
+        title: 'Cultural Intelligence', 
+        description: 'Soft power strategy.', 
+        features: [
+            'Negotiation Style Guide', 'Business Etiquette Protocol', 'Social Taboo Warning', 'Communication Context Level',
+            'Decision Hierarchy Map', 'Gift Giving Guidelines', 'Time Perception Analysis', 'Trust Building Tactics',
+            'Language Nuance Guide', 'Meeting Protocol'
+        ] 
+    },
+    'negotiation_advantage': { 
+        title: 'Negotiation Advantage', 
+        description: 'Leverage & BATNA analysis.', 
+        features: [
+            'Leverage Point Identification', 'Objection Handling Scripts', 'BATNA Calculation', 'ZOPA (Zone of Agreement) Map',
+            'Concession Strategy', 'Stakeholder Influence Map', 'Power Dynamic Analysis', 'Timing Strategy',
+            'Information Asymmetry Check', 'Closing Tactic Selection'
+        ] 
+    },
+    'stakeholder_analysis': { 
+        title: 'Stakeholder Map', 
+        description: 'Influence & interest mapping.', 
+        features: [
+            'Key Player Identification', 'Interest vs Power Grid', 'Hidden Influencer Detection', 'Opposition Risk Analysis',
+            'Coalition Building Strategy', 'Engagement Plan', 'Communication Channel Map', 'Expectation Management',
+            'Political Capital Assessment', 'Community Impact Analysis'
+        ] 
+    },
+    'relationship_builder': { 
+        title: 'Relationship Strategy', 
+        description: 'Long-term engagement plan.', 
+        features: [
+            'Trust Building Roadmap', 'Communication Cadence', 'Joint Milestone Planning', 'Conflict Resolution Protocol',
+            'Executive Sponsorship Plan', 'Social Capital Investment', 'Feedback Loop Design', 'Cultural Bonding Activities',
+            'Success Sharing Model', 'Legacy Building Strategy'
+        ] 
+    },
+    'final_review': { 
+        title: 'Final Dossier', 
+        description: 'Synthesis & Export.', 
+        features: [
+            'Executive Summary Gen', 'Full Strategic Report', 'Audio Briefing Synthesis', 'Visual Data Export',
+            'Actionable Roadmap', 'Risk Matrix Export', 'Partner Contact List', 'Investment Pitch Deck',
+            'Policy Memo Generation', 'Translation & Localization'
+        ] 
+    }
 };
 
 const MODULE_PHASES: Record<string, string> = {
@@ -74,6 +234,13 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
     
     // Track user overrides: true = forced on, false = forced off
     const [moduleOverrides, setModuleOverrides] = useState<Record<string, boolean>>({});
+    
+    // Track sub-feature toggles: Record<moduleId, Record<featureName, boolean>>
+    const [featureToggles, setFeatureToggles] = useState<Record<string, Record<string, boolean>>>({});
+    
+    // Track custom user-added features: Record<moduleId, string[]>
+    const [customFeatures, setCustomFeatures] = useState<Record<string, string[]>>({});
+    const [newFeatureInputs, setNewFeatureInputs] = useState<Record<string, string>>({});
 
     // --- Handlers ---
 
@@ -97,17 +264,50 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
     const toggleModuleActive = (moduleId: string) => {
         setModuleOverrides(prev => {
             const newState = { ...prev };
-            
-            // Check current effective state
             const isRecommended = getRecommendedModules().has(moduleId);
             const currentOverride = prev[moduleId];
-            
             let isCurrentlyActive = isRecommended;
             if (currentOverride !== undefined) isCurrentlyActive = currentOverride;
-
             newState[moduleId] = !isCurrentlyActive;
             return newState;
         });
+    };
+
+    const toggleFeature = (moduleId: string, featureName: string) => {
+        setFeatureToggles(prev => {
+            const moduleFeatures = prev[moduleId] || {};
+            // If undefined, it means it's currently ON (default state). So we toggle to false.
+            const current = moduleFeatures[featureName] !== false;
+            return {
+                ...prev,
+                [moduleId]: { ...moduleFeatures, [featureName]: !current }
+            };
+        });
+    };
+
+    const handleAddCustomFeature = (moduleId: string) => {
+        const val = newFeatureInputs[moduleId]?.trim();
+        if (!val) return;
+        
+        setCustomFeatures(prev => ({
+            ...prev,
+            [moduleId]: [...(prev[moduleId] || []), val]
+        }));
+        
+        // Ensure it's toggled ON by default
+        setFeatureToggles(prev => ({
+            ...prev,
+            [moduleId]: { ...(prev[moduleId] || {}), [val]: true }
+        }));
+        
+        setNewFeatureInputs(prev => ({ ...prev, [moduleId]: '' }));
+    };
+
+    const removeCustomFeature = (moduleId: string, featureName: string) => {
+        setCustomFeatures(prev => ({
+            ...prev,
+            [moduleId]: (prev[moduleId] || []).filter(f => f !== featureName)
+        }));
     };
 
     // Calculate recommended modules based on intents (Pure function of intents)
@@ -494,12 +694,11 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                             </p>
                         </div>
                         
-                        {/* Status Indicator */}
                         <div className="hidden md:block text-right">
                             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">System Configuration</div>
                             <div className="flex items-center justify-end gap-2 mt-1">
                                 <div className={`w-2 h-2 rounded-full ${activeEngines.length > 0 ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`}></div>
-                                <span className="text-sm font-bold text-slate-900">{activeEngines.length} Modules Active</span>
+                                <span className="text-sm font-bold text-slate-900">{activeEngines.length} Engines Ready</span>
                             </div>
                         </div>
                     </div>
@@ -545,21 +744,31 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                         </div>
                     </div>
 
+                    {/* Indicator Bar */}
+                    {hasSelected && (
+                        <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-lg flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Layers className="w-5 h-5 text-indigo-600" />
+                                <span className="text-sm font-bold text-indigo-900">
+                                    Selected Missions: <span className="font-normal text-indigo-700">{(params.selectedIntents || []).map(id => STRATEGIC_INTENTS.find(i => i.id === id)?.title).join(', ')}</span>
+                                </span>
+                            </div>
+                            <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">
+                                {activeEngines.length} Analytical Modules Engaged
+                            </span>
+                        </div>
+                    )}
+
                     {/* Section 2: Mission Architecture (Review & Customization) */}
                     <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
                         <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                                    <Layers className="w-5 h-5 text-slate-700" />
+                                    <SlidersIcon className="w-5 h-5 text-slate-700" />
                                     Mission Architecture
                                 </h3>
-                                <p className="text-xs text-slate-500">Review & customize active intelligence engines.</p>
+                                <p className="text-xs text-slate-500">Review & customize active intelligence engines and capabilities.</p>
                             </div>
-                            {hasSelected && (
-                                <span className="text-xs font-bold bg-slate-900 text-white px-3 py-1 rounded-full">
-                                    {activeEngines.length} Engines Engaged
-                                </span>
-                            )}
                         </div>
                         
                         <div className="p-6">
@@ -576,49 +785,104 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                                                 <h4 className="font-bold text-sm uppercase tracking-widest text-slate-900">{phase} Phase</h4>
                                             </div>
                                             
-                                            <div className="grid gap-3">
+                                            <div className="grid gap-4">
                                                 {ALL_MODULE_IDS.filter(id => MODULE_PHASES[id] === phase).map(modId => {
                                                     const isActive = activeEngines.includes(modId);
                                                     const meta = MODULE_META[modId] || { title: modId, description: 'Standard Analysis Module', features: [] };
-                                                    
+                                                    const activeFeatureCount = meta.features.filter(f => featureToggles[modId]?.[f] !== false).length;
+                                                    const customList = customFeatures[modId] || [];
+                                                    const totalCount = activeFeatureCount + customList.length;
+
                                                     return (
-                                                        <div key={modId} className={`flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
+                                                        <div key={modId} className={`rounded-lg border transition-all duration-200 ${
                                                             isActive 
-                                                            ? 'bg-white border-slate-300 shadow-sm hover:shadow-md' 
-                                                            : 'bg-slate-50 border-slate-100 opacity-70'
+                                                            ? 'bg-white border-slate-300 shadow-sm' 
+                                                            : 'bg-slate-50 border-slate-100 opacity-60 hover:opacity-100'
                                                         }`}>
-                                                            {/* Title */}
-                                                            <div className="flex items-center gap-3 md:w-1/4 mb-2 md:mb-0">
-                                                                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-slate-300'}`}></div>
-                                                                <span className={`text-sm font-bold ${isActive ? 'text-slate-900' : 'text-slate-500'}`}>
-                                                                    {meta.title}
-                                                                </span>
+                                                            {/* Header Row */}
+                                                            <div className="flex flex-col md:flex-row md:items-center justify-between p-4">
+                                                                <div className="flex items-center gap-3 md:w-1/3">
+                                                                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-slate-300'}`}></div>
+                                                                    <div>
+                                                                        <span className={`text-sm font-bold block ${isActive ? 'text-slate-900' : 'text-slate-500'}`}>
+                                                                            {meta.title}
+                                                                        </span>
+                                                                        <span className="text-xs text-slate-500">{meta.description}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Capability Counter */}
+                                                                <div className="flex-1 md:text-center my-2 md:my-0">
+                                                                    <span className={`text-xs px-2 py-1 rounded font-bold ${isActive ? 'bg-slate-100 text-slate-700' : 'text-slate-400'}`}>
+                                                                        {totalCount} Capabilities Active
+                                                                    </span>
+                                                                </div>
+                                                                
+                                                                {/* Toggle */}
+                                                                <button
+                                                                    onClick={() => toggleModuleActive(modId)}
+                                                                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase border transition-colors ${
+                                                                        isActive 
+                                                                            ? 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800' 
+                                                                            : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600'
+                                                                    }`}
+                                                                >
+                                                                    {isActive ? 'Active' : 'Inactive'}
+                                                                    {isActive ? <CheckCircle className="w-3 h-3" /> : <div className="w-3 h-3 rounded-full border border-slate-300"></div>}
+                                                                </button>
                                                             </div>
 
-                                                            {/* Gap-Filling Description & Extras */}
-                                                            <div className="flex-1 px-0 md:px-6 mb-3 md:mb-0">
-                                                                <div className="text-xs text-slate-500 font-medium mb-1">{meta.description}</div>
-                                                                <div className="flex flex-wrap gap-2">
-                                                                    {meta.features.map((feature, idx) => (
-                                                                        <span key={idx} className={`text-[10px] px-2 py-0.5 rounded border ${isActive ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-transparent text-slate-400 border-slate-100'}`}>
-                                                                            {feature}
-                                                                        </span>
-                                                                    ))}
+                                                            {/* Detailed Features Panel (Only if Active) */}
+                                                            {isActive && (
+                                                                <div className="border-t border-slate-100 p-4 bg-slate-50/50 rounded-b-lg">
+                                                                    <div className="mb-3">
+                                                                        <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Active Micro-Capabilities</h5>
+                                                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                                                            {meta.features.map((feature, idx) => {
+                                                                                const isChecked = featureToggles[modId]?.[feature] !== false; // Default true
+                                                                                return (
+                                                                                    <label key={idx} className={`flex items-start gap-2 cursor-pointer p-2 rounded border transition-colors ${isChecked ? 'bg-white border-slate-200' : 'bg-transparent border-transparent opacity-50'}`}>
+                                                                                        <input 
+                                                                                            type="checkbox" 
+                                                                                            checked={isChecked}
+                                                                                            onChange={() => toggleFeature(modId, feature)}
+                                                                                            className="mt-0.5 h-3 w-3 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                                                                                        />
+                                                                                        <span className="text-xs text-slate-700 font-medium leading-tight">{feature}</span>
+                                                                                    </label>
+                                                                                );
+                                                                            })}
+                                                                            {/* User added features */}
+                                                                            {(customFeatures[modId] || []).map((feat, idx) => (
+                                                                                <div key={`custom-${idx}`} className="flex items-center justify-between p-2 rounded border bg-blue-50 border-blue-200">
+                                                                                    <span className="text-xs text-blue-800 font-medium leading-tight">{feat}</span>
+                                                                                    <button onClick={() => removeCustomFeature(modId, feat)} className="text-blue-400 hover:text-red-500 ml-2"><TrashIcon className="w-3 h-3"/></button>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    {/* Custom Input */}
+                                                                    <div className="mt-4 pt-3 border-t border-slate-200 flex items-center gap-2">
+                                                                        <PlusCircleIcon className="w-4 h-4 text-slate-400" />
+                                                                        <input 
+                                                                            type="text" 
+                                                                            placeholder="Add custom capability..." 
+                                                                            className="bg-transparent text-xs font-medium text-slate-700 placeholder-slate-400 outline-none flex-grow"
+                                                                            value={newFeatureInputs[modId] || ''}
+                                                                            onChange={(e) => setNewFeatureInputs(prev => ({...prev, [modId]: e.target.value}))}
+                                                                            onKeyDown={(e) => e.key === 'Enter' && handleAddCustomFeature(modId)}
+                                                                        />
+                                                                        <button 
+                                                                            onClick={() => handleAddCustomFeature(modId)}
+                                                                            disabled={!newFeatureInputs[modId]}
+                                                                            className="text-xs font-bold text-slate-500 hover:text-slate-900 uppercase disabled:opacity-50"
+                                                                        >
+                                                                            Add
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            
-                                                            {/* Toggle */}
-                                                            <button
-                                                                onClick={() => toggleModuleActive(modId)}
-                                                                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase border transition-colors ${
-                                                                    isActive 
-                                                                        ? 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800' 
-                                                                        : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600'
-                                                                }`}
-                                                            >
-                                                                {isActive ? 'Active' : 'Inactive'}
-                                                                {isActive ? <CheckCircle className="w-3 h-3" /> : <div className="w-3 h-3 rounded-full border border-slate-300"></div>}
-                                                            </button>
+                                                            )}
                                                         </div>
                                                     );
                                                 })}
