@@ -1,8 +1,11 @@
 
-import React, { useState } from 'react';
-import { ReportParameters } from '../types';
+import React, { useState, useEffect } from 'react';
+import { ReportParameters, SPIResult, EthicalCheckResult } from '../types';
 import { generateSpeech, decodeAudioData } from '../services/nexusService';
-import { FileText, Users, GlobeIcon, Target, ShieldCheck, TrendingUp, BrainCircuit, DownloadIcon, NexusLogo } from './Icons';
+import { calculateSPI, runEthicalSafeguards } from '../services/spiEngine';
+import { FileText, Users, GlobeIcon, Target, ShieldCheck, TrendingUp, BrainCircuit, DownloadIcon, NexusLogo, AlertTriangleIcon, CheckCircle } from './Icons';
+import SuccessScoreCard from './SuccessScoreCard';
+import EthicsPanel from './EthicsPanel';
 
 interface ReviewStepProps {
     params: ReportParameters;
@@ -12,6 +15,86 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({ params }) => {
     const [activeTab, setActiveTab] = useState<'identity' | 'mission' | 'modules' | 'artifacts'>('identity');
     const [isPlaying, setIsPlaying] = useState(false);
     const [audioLoading, setAudioLoading] = useState(false);
+    const [spiData, setSpiData] = useState<SPIResult | null>(null);
+    const [ethicalData, setEthicalData] = useState<EthicalCheckResult | null>(null);
+    const [backendEthics, setBackendEthics] = useState<any>(null);
+    const [backendStatus, setBackendStatus] = useState<string>('Idle');
+
+    useEffect(() => {
+        // 1. Calculate scores locally for immediate UI feedback (Legacy/Fast Path)
+        const spi = calculateSPI(params);
+        const ethics = runEthicalSafeguards(params);
+        setSpiData(spi);
+        setEthicalData(ethics);
+
+        // 2. Prepare Backend Payload from calculated sub-scores
+        const payload: any = {
+            context: {
+                project: { industry: params.industry[0], region: params.region },
+                target: params.idealPartnerProfile,
+            }
+        };
+        
+        // Flatten SPI inputs for payload
+        spi.breakdown.forEach(b => {
+            if(b.label === 'Economic Readiness') payload.ER = b.value;
+            if(b.label === 'Symbiosis Potential') payload.SP = b.value;
+            if(b.label === 'Cultural Compatibility') payload.CC = b.value;
+            if(b.label === 'Partner Reliability') payload.PR = b.value;
+            if(b.label === 'Activation Velocity') payload.CA = b.value;
+            if(b.label === 'Ethical Alignment') payload.EA = b.value;
+            if(b.label === 'User Transparency') payload.UT = b.value;
+        });
+
+        // 3. Submit to Backend & Poll
+        const submitAndPoll = async () => {
+            try {
+                setBackendStatus('Submitting...');
+                const res = await fetch("http://localhost:5002/api/cases", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.ok && data.case) {
+                    const caseId = data.case.id;
+                    setBackendStatus('Processing...');
+                    
+                    const interval = setInterval(async () => {
+                        try {
+                            const pollRes = await fetch(`http://localhost:5002/api/cases/${caseId}`);
+                            const pollData = await pollRes.json();
+                            if (pollData.case) {
+                                if (pollData.case.status === "complete") {
+                                    clearInterval(interval);
+                                    setBackendStatus('Verified');
+                                    // Update local SPI with verified backend result if available
+                                    if (pollData.case.result?.spi) {
+                                        // Optional: Merge backend SPI logic if differing
+                                    }
+                                    // Update Ethics from Backend
+                                    if (pollData.case.result?.ethics) {
+                                        setBackendEthics(pollData.case.result.ethics);
+                                    }
+                                } else if (pollData.case.status === "error") {
+                                    clearInterval(interval);
+                                    setBackendStatus('Error');
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Polling error", e);
+                        }
+                    }, 1500);
+                }
+            } catch (e) {
+                console.error("Backend connectivity issue", e);
+                setBackendStatus('Offline (Local Mode)');
+            }
+        };
+        
+        submitAndPoll();
+
+    }, [params]);
 
     const handleListen = async () => {
         if (isPlaying) return;
@@ -22,7 +105,8 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({ params }) => {
         Strategic Intent: ${params.selectedIntents?.join(' plus ') || 'Standard Analysis'}.
         Target Sector: ${params.industry.join(' and ')}.
         Region: ${params.region}.
-        This dossier contains comprehensive analysis across ${params.selectedIntents?.length || 1} mission vectors.`;
+        Success Probability Index is ${spiData?.spi} percent.
+        Ethical Safeguard status: ${ethicalData?.passed ? 'Passed' : 'Requires Review'}.`;
         
         const base64Audio = await generateSpeech(textToSay);
         
@@ -56,7 +140,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({ params }) => {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Intelligence Dossier</h1>
-                        <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">Ref: {params.reportId || 'PENDING'}</p>
+                        <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">Ref: {params.reportId || 'PENDING'} • Status: {backendStatus}</p>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -102,6 +186,32 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({ params }) => {
                         </div>
 
                         <div className="p-12 relative z-10">
+                            {/* PREDICTIVE SCORE HEADER */}
+                            <div className="mb-10 space-y-6">
+                                {spiData && <SuccessScoreCard spiResult={spiData} />}
+                                
+                                {/* Display Backend Ethics Report if available, else local fallback status */}
+                                {backendEthics ? (
+                                    <EthicsPanel ethics={backendEthics} />
+                                ) : (
+                                    ethicalData && (
+                                        <div className={`p-4 rounded-lg border flex items-start gap-4 ${ethicalData.passed ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}`}>
+                                            <div className={`p-2 rounded-full ${ethicalData.passed ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
+                                                {ethicalData.passed ? <ShieldCheck className="w-5 h-5" /> : <AlertTriangleIcon className="w-5 h-5" />}
+                                            </div>
+                                            <div>
+                                                <h4 className={`font-bold text-sm ${ethicalData.passed ? 'text-blue-900' : 'text-red-900'}`}>
+                                                    Ethical Safeguard Engine: {ethicalData.passed ? 'Pass' : 'Review Required'}
+                                                </h4>
+                                                <p className="text-xs text-slate-600 mt-1">
+                                                    {backendStatus === 'Processing...' ? 'Running deep scan...' : 'Preliminary check complete.'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+
                             {activeTab === 'identity' && (
                                 <div className="space-y-8 animate-fade-in">
                                     <h2 className="text-2xl font-bold text-slate-900 border-b border-gray-100 pb-4 mb-6">Identity Profile</h2>

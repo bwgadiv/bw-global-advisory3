@@ -116,7 +116,7 @@ const Inquire: React.FC<InquireProps> = ({ params, onApplySuggestions }) => {
         <div className="h-full flex flex-col bg-white border-l border-slate-200 shadow-xl relative font-sans">
             {/* Header */}
             <div className="p-4 bg-gradient-to-b from-white to-slate-50 border-b border-slate-200 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0b57a4] to-blue-600 flex items-center justify-center text-white font-bold shadow-md">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-bronze-700 to-bronze-600 flex items-center justify-center text-white font-bold shadow-md">
                     BW
                 </div>
                 <div>
@@ -135,7 +135,7 @@ const Inquire: React.FC<InquireProps> = ({ params, onApplySuggestions }) => {
                         {/* Bubble */}
                         <div className={`max-w-[90%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
                             msg.sender === 'user' 
-                                ? 'bg-[#0b57a4] text-white rounded-tr-none' 
+                                ? 'bg-bronze-600 text-white rounded-tr-none' 
                                 : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
                         }`}>
                             {msg.isThinking ? (
@@ -162,9 +162,9 @@ const Inquire: React.FC<InquireProps> = ({ params, onApplySuggestions }) => {
                                     <button
                                         key={opt.id}
                                         onClick={() => handleOptionClick(opt)}
-                                        className="w-full text-left p-3 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl transition-all group shadow-sm"
+                                        className="w-full text-left p-3 bg-white hover:bg-bronze-50 border border-slate-200 hover:border-bronze-200 rounded-xl transition-all group shadow-sm"
                                     >
-                                        <div className="font-bold text-xs text-slate-900 group-hover:text-blue-700 mb-0.5">
+                                        <div className="font-bold text-xs text-slate-900 group-hover:text-bronze-700 mb-0.5">
                                             {opt.title}
                                         </div>
                                         <div className="text-[10px] text-slate-500 leading-tight">
@@ -181,13 +181,13 @@ const Inquire: React.FC<InquireProps> = ({ params, onApplySuggestions }) => {
 
             {/* Quick Actions (Floating if needed, but here static at bottom) */}
             <div className="p-2 bg-slate-50 border-t border-slate-100 flex gap-2 overflow-x-auto">
-                <button onClick={() => runQuickAction('clarify')} className="whitespace-nowrap px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-sm">
+                <button onClick={() => runQuickAction('clarify')} className="whitespace-nowrap px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:bg-bronze-50 hover:text-bronze-700 transition-colors shadow-sm">
                     ✨ Clarify Objective
                 </button>
-                <button onClick={() => runQuickAction('partners')} className="whitespace-nowrap px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-sm">
+                <button onClick={() => runQuickAction('partners')} className="whitespace-nowrap px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:bg-bronze-50 hover:text-bronze-700 transition-colors shadow-sm">
                     🤝 Find Partners
                 </button>
-                <button onClick={() => runQuickAction('risk')} className="whitespace-nowrap px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-sm">
+                <button onClick={() => runQuickAction('risk')} className="whitespace-nowrap px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:bg-bronze-50 hover:text-bronze-700 transition-colors shadow-sm">
                     🛡️ Check Risks
                 </button>
             </div>
@@ -202,12 +202,12 @@ const Inquire: React.FC<InquireProps> = ({ params, onApplySuggestions }) => {
                         onKeyDown={(e) => e.key === 'Enter' && !isProcessing && handleSendMessage()}
                         placeholder={isProcessing ? "Processing..." : "Ask Copilot..."}
                         disabled={isProcessing}
-                        className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0b57a4] focus:bg-white transition-all shadow-inner"
+                        className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-bronze-600 focus:bg-white transition-all shadow-inner"
                     />
                     <button 
                         onClick={() => handleSendMessage()}
                         disabled={!inputText.trim() || isProcessing}
-                        className="absolute right-2 top-2 p-1.5 bg-[#0b57a4] text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-[#0b57a4] transition-colors shadow-sm"
+                        className="absolute right-2 top-2 p-1.5 bg-bronze-600 text-white rounded-lg hover:bg-bronze-700 disabled:opacity-50 disabled:hover:bg-bronze-600 transition-colors shadow-sm"
                     >
                         <Zap className="w-4 h-4" />
                     </button>

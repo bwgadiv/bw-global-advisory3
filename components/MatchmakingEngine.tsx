@@ -57,15 +57,15 @@ const MatchmakingEngine: React.FC<MatchmakingEngineProps> = ({ params, onMatches
     return (
         <div className={`space-y-4 ${compact ? '' : 'space-y-6'}`}>
             {!compact && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-blue-900 mb-2">🎯 Multi-Layered Matchmaking Engine</h3>
-                    <p className="text-sm text-blue-800 mb-4">
+                <div className="bg-bronze-50 border border-bronze-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-bronze-900 mb-2">🎯 Multi-Layered Matchmaking Engine</h3>
+                    <p className="text-sm text-bronze-800 mb-4">
                         Find the best opportunities beyond your initial idea. Our AI analyzes global data to identify superior alternatives and synergistic partnerships.
                     </p>
                     <button
                         onClick={runMatchmaking}
                         disabled={isSearching}
-                        className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-bold transition-colors flex items-center gap-2"
+                        className="bg-bronze-600 text-white px-6 py-2.5 rounded-lg hover:bg-bronze-700 disabled:opacity-50 font-bold transition-colors flex items-center gap-2"
                     >
                         {isSearching ? (
                             <>
@@ -81,8 +81,8 @@ const MatchmakingEngine: React.FC<MatchmakingEngineProps> = ({ params, onMatches
 
             {/* Compact Header for Auto-Run Mode */}
             {compact && matches.length === 0 && isSearching && (
-                <div className="flex items-center gap-3 text-blue-600 p-4 bg-blue-50 rounded-lg border border-blue-100 animate-pulse">
-                    <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <div className="flex items-center gap-3 text-bronze-600 p-4 bg-bronze-50 rounded-lg border border-bronze-100 animate-pulse">
+                    <div className="w-4 h-4 border-2 border-bronze-200 border-t-bronze-600 rounded-full animate-spin"></div>
                     <span className="text-xs font-bold uppercase tracking-wider">Scanning Global Opportunities...</span>
                 </div>
             )}
@@ -100,7 +100,7 @@ const MatchmakingEngine: React.FC<MatchmakingEngineProps> = ({ params, onMatches
                                     </div>
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${
                                         match.type === 'baseline' ? 'bg-green-100 text-green-800' :
-                                        match.type === 'alternative' ? 'bg-blue-100 text-blue-800' :
+                                        match.type === 'alternative' ? 'bg-bronze-100 text-bronze-800' :
                                         'bg-purple-100 text-purple-800'
                                     }`}>
                                         {match.type}

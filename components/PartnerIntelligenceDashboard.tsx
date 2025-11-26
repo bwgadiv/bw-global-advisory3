@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import type { ReportParameters } from '../types';
+import type { ReportParameters, PartnerScore } from '../types';
+import { calculatePartnerScore } from '../services/spiEngine';
 import { HandshakeIcon, ShieldCheck, CheckCircle, AlertTriangleIcon, SearchIcon } from './Icons';
 
 interface PartnerProfile {
@@ -32,6 +33,7 @@ interface PartnerProfile {
     preferredMethod: 'email' | 'phone' | 'in-person' | 'formal-letter';
   };
   lastUpdated: string;
+  score?: PartnerScore; // Added score field
 }
 
 interface PartnerIntelligenceDashboardProps {
@@ -133,7 +135,14 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
         lastUpdated: '2024-11-12'
       }
     ];
-    setPartners(mockPartners);
+
+    // Enrich with live score calculation
+    const scoredPartners = mockPartners.map(p => ({
+        ...p,
+        score: calculatePartnerScore(p)
+    }));
+
+    setPartners(scoredPartners);
   }, []);
 
   const filteredPartners = partners.filter(partner => {
@@ -167,9 +176,14 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
                           <h4 className="text-sm font-bold text-slate-900">{partner.name}</h4>
                           <div className="flex gap-2 mt-1">
                               <span className="text-[10px] uppercase bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{partner.type}</span>
-                              <span className={`text-[10px] font-bold uppercase ${getRiskColor(partner.riskFactors[0]?.level)}`}>
-                                  {partner.riskFactors[0]?.level} Risk
-                              </span>
+                              {partner.score && (
+                                  <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                                      partner.score.rating === 'Green' ? 'bg-green-100 text-green-800' : 
+                                      partner.score.rating === 'Amber' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'
+                                  }`}>
+                                      {partner.score.rating} Rated
+                                  </span>
+                              )}
                           </div>
                       </div>
                       <div className={`text-xl font-bold ${getCredibilityColor(partner.credibilityScore)}`}>
@@ -189,8 +203,8 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
           Partner Intelligence Dashboard
         </h2>
         <p className="text-slate-500 mb-6">
-          Comprehensive intelligence on potential partners across government, NGO, academic, and community sectors.
-          Build confidence through verified track records, cultural insights, and risk assessments.
+          Comprehensive intelligence on potential partners.
+          <br/>Scores are calculated using the Nexus Partner Rating Engine (Financial Health, Track Record, Compliance, Strategic Fit).
         </p>
 
         {/* Search and Filter Controls */}
@@ -235,9 +249,9 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-700 transition-colors">{partner.name}</h3>
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-bronze-700 transition-colors">{partner.name}</h3>
                   <span className={`text-[10px] uppercase px-2 py-0.5 rounded font-bold border ${
-                    partner.type === 'government' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                    partner.type === 'government' ? 'bg-bronze-50 text-bronze-800 border-bronze-200' :
                     partner.type === 'ngo' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
                     partner.type === 'academic' ? 'bg-purple-50 text-purple-800 border-purple-200' :
                     'bg-slate-200 text-slate-700 border-slate-300'
@@ -246,10 +260,10 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
                   </span>
                 </div>
                 <div className="text-right">
-                  <div className={`text-lg font-bold ${getCredibilityColor(partner.credibilityScore)}`}>
-                    {partner.credibilityScore}
+                  <div className={`text-2xl font-bold ${getCredibilityColor(partner.score?.overallScore || 0)}`}>
+                    {partner.score?.overallScore}
                   </div>
-                  <div className="text-[10px] text-slate-500 uppercase font-bold">Credibility</div>
+                  <div className="text-[10px] text-slate-500 uppercase font-bold">Nexus Score</div>
                 </div>
               </div>
 
@@ -277,9 +291,12 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
 
               <div className="flex justify-between items-center text-xs text-slate-500 border-t border-slate-200 pt-2 mt-2">
                 <span className="flex items-center gap-1">
-                    RISK: 
-                    <span className={`font-bold uppercase ${getRiskColor(partner.riskFactors[0]?.level || 'low')}`}>
-                        {partner.riskFactors[0]?.level || 'LOW'}
+                    RATING: 
+                    <span className={`font-bold uppercase px-1.5 rounded text-[10px] ${
+                        partner.score?.rating === 'Green' ? 'bg-green-100 text-green-800' : 
+                        partner.score?.rating === 'Amber' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                        {partner.score?.rating || 'N/A'}
                     </span>
                 </span>
                 <span className="font-mono">{new Date(partner.lastUpdated).toLocaleDateString()}</span>
@@ -314,22 +331,32 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
               {/* Credibility Overview */}
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded border border-slate-200 text-center">
-                  <div className={`text-3xl font-extrabold ${getCredibilityColor(selectedPartner.credibilityScore)}`}>
-                    {selectedPartner.credibilityScore}
+                  <div className={`text-4xl font-extrabold ${getCredibilityColor(selectedPartner.score?.overallScore || 0)}`}>
+                    {selectedPartner.score?.overallScore}
                   </div>
-                  <div className="text-xs text-slate-500 uppercase font-bold mt-1">Credibility Score</div>
+                  <div className="text-xs text-slate-500 uppercase font-bold mt-1">Partner Rating</div>
                 </div>
-                <div className="bg-white p-4 rounded border border-slate-200 text-center">
-                  <div className="text-3xl font-extrabold text-blue-800">
-                    {selectedPartner.trackRecord.length}
-                  </div>
-                  <div className="text-xs text-slate-500 uppercase font-bold mt-1">Projects Completed</div>
-                </div>
-                <div className="bg-white p-4 rounded border border-slate-200 text-center">
-                  <div className="text-3xl font-extrabold text-slate-800">
-                    {selectedPartner.expertise.length}
-                  </div>
-                  <div className="text-xs text-slate-500 uppercase font-bold mt-1">Expertise Areas</div>
+                
+                <div className="bg-white p-4 rounded border border-slate-200 col-span-2">
+                    <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">Score Components</h5>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-slate-600">Financial Health</span>
+                            <span className="font-bold">{selectedPartner.score?.components.financialHealth}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-slate-600">Project Delivery</span>
+                            <span className="font-bold">{selectedPartner.score?.components.projectDelivery}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-slate-600">Compliance</span>
+                            <span className="font-bold">{selectedPartner.score?.components.legalCompliance}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-slate-600">Strategic Fit</span>
+                            <span className="font-bold">{selectedPartner.score?.components.strategicFit}</span>
+                        </div>
+                    </div>
                 </div>
               </div>
 
@@ -384,7 +411,7 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
               {/* Contact Information */}
               <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg">
                 <h4 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <HandshakeIcon className="w-5 h-5 text-blue-400" /> Contact Information
+                    <HandshakeIcon className="w-5 h-5 text-bronze-400" /> Contact Information
                 </h4>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b border-slate-700 pb-2">
@@ -399,7 +426,7 @@ const PartnerIntelligenceDashboard: React.FC<PartnerIntelligenceDashboardProps> 
                   )}
                   <div className="flex justify-between pt-1">
                     <span className="text-slate-400">Preferred Method</span>
-                    <span className="font-bold text-blue-400 uppercase tracking-wide">{selectedPartner.contactInfo.preferredMethod}</span>
+                    <span className="font-bold text-bronze-400 uppercase tracking-wide">{selectedPartner.contactInfo.preferredMethod}</span>
                   </div>
                 </div>
               </div>

@@ -3,8 +3,9 @@ import React, { useState, useCallback } from 'react';
 import { IntelligenceDesignStudio } from './components/IntelligenceDesignStudio';
 import Dashboard from './components/Dashboard';
 import CommandCenter from './components/CommandCenter';
+import AdminDashboard from './components/Admin/AdminDashboard';
 import { ReportParameters, UserProfile } from './types';
-import { NexusLogo, GlobeIcon, LayoutDashboardIcon, ReportIcon } from './components/Icons';
+import { NexusLogo, GlobeIcon, LayoutDashboardIcon, ReportIcon, ShieldCheckIcon } from './components/Icons';
 import { LandingPage } from './components/LandingPage';
 import useEscapeKey from './hooks/useEscapeKey';
 
@@ -50,7 +51,7 @@ const initialParams: ReportParameters = {
     expansionTimeline: '12-18 Months'
 };
 
-type ViewMode = 'command-center' | 'intelligence-system' | 'live-feed';
+type ViewMode = 'command-center' | 'intelligence-system' | 'live-feed' | 'admin-dashboard';
 
 const App: React.FC = () => {
     // DEFAULT VIEW IS NOW THE INTELLIGENCE SYSTEM (GENERATOR)
@@ -61,7 +62,7 @@ const App: React.FC = () => {
     
     // Enable Escape key to return to command center (repository)
     const handleEscape = useCallback(() => {
-        if (viewMode !== 'command-center') {
+        if (viewMode !== 'command-center' && viewMode !== 'admin-dashboard') {
             setViewMode('command-center');
         }
     }, [viewMode]);
@@ -94,6 +95,20 @@ const App: React.FC = () => {
 
     if (!hasEntered) {
         return <LandingPage onEnter={() => setHasEntered(true)} />;
+    }
+
+    if (viewMode === 'admin-dashboard') {
+        return (
+            <div className="h-screen flex flex-col">
+                <AdminDashboard />
+                <button 
+                    onClick={() => setViewMode('command-center')}
+                    className="fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded shadow-lg text-xs font-bold"
+                >
+                    Exit Admin Mode
+                </button>
+            </div>
+        );
     }
 
     return (
@@ -148,6 +163,13 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <button 
+                        onClick={() => setViewMode('admin-dashboard')}
+                        className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors"
+                        title="Admin Console"
+                    >
+                        <ShieldCheckIcon className="w-5 h-5" />
+                    </button>
                     <button 
                         onClick={startNewMission}
                         className="hidden lg:flex items-center gap-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 px-4 py-2 rounded-md transition-colors shadow-sm"

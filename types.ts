@@ -1,5 +1,5 @@
 
-export type SkillLevel = 'observer' | 'novice' | 'associate' | 'senior' | 'executive' | 'visionary';
+export type SkillLevel = 'observer' | 'novice' | 'associate' | 'senior' | 'executive' | 'visionary' | 'expert' | 'experienced';
 
 export interface ReportParameters {
   reportName: string;
@@ -662,4 +662,42 @@ export interface LatentAsset {
 export interface ReportSuggestions {
     objectives: string[];
     partners: string[];
+}
+
+// --- NEW TYPES FOR SPI & ETHICAL ENGINES ---
+
+export interface SPIBreakdown {
+  label: string;
+  value: number;
+  weight: number;
+  provenance?: string[];
+}
+
+export interface SPIResult {
+  spi: number;
+  ciLow: number;
+  ciHigh: number;
+  breakdown: SPIBreakdown[];
+  drivers: { positive: string[]; negative: string[] };
+  generatedAt: string;
+}
+
+export interface PartnerScore {
+  overallScore: number;
+  rating: 'Green' | 'Amber' | 'Red';
+  components: {
+    financialHealth: number;
+    projectDelivery: number;
+    legalCompliance: number;
+    strategicFit: number;
+    localCapacity: number;
+    reputation: number;
+  };
+}
+
+export interface EthicalCheckResult {
+  passed: boolean;
+  flags: string[];
+  riskScore: number; // 0-100, higher is riskier
+  mitigationRequired: boolean;
 }

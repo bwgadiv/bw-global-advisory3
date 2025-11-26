@@ -14,7 +14,13 @@
     "@google/genai": "^1.30.0",
     "recharts": "^3.5.0",
     "jspdf": "^2.5.1",
-    "html2canvas": "^1.4.1"
+    "html2canvas": "^1.4.1",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "path": "^0.12.7",
+    "fs": "^0.0.1-security",
+    "crypto": "^1.0.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

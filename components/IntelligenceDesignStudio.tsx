@@ -785,14 +785,14 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
 
                     {/* Indicator Bar */}
                     {hasSelected && (
-                        <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-lg flex items-center justify-between">
+                        <div className="bg-bronze-50 border border-bronze-100 p-4 rounded-lg flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <Layers className="w-5 h-5 text-indigo-600" />
-                                <span className="text-sm font-bold text-indigo-900">
-                                    Selected Missions: <span className="font-normal text-indigo-700">{(params.selectedIntents || []).map(id => STRATEGIC_INTENTS.find(i => i.id === id)?.title).join(', ')}</span>
+                                <Layers className="w-5 h-5 text-bronze-600" />
+                                <span className="text-sm font-bold text-bronze-900">
+                                    Selected Missions: <span className="font-normal text-bronze-700">{(params.selectedIntents || []).map(id => STRATEGIC_INTENTS.find(i => i.id === id)?.title).join(', ')}</span>
                                 </span>
                             </div>
-                            <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">
+                            <span className="text-xs font-bold bg-bronze-100 text-bronze-700 px-3 py-1 rounded-full">
                                 {activeEngines.length} Analytical Modules Engaged
                             </span>
                         </div>
@@ -893,9 +893,9 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                                                                             })}
                                                                             {/* User added features */}
                                                                             {(customFeatures[modId] || []).map((feat, idx) => (
-                                                                                <div key={`custom-${idx}`} className="flex items-center justify-between p-2 rounded border bg-blue-50 border-blue-200">
-                                                                                    <span className="text-xs text-blue-800 font-medium leading-tight">{feat}</span>
-                                                                                    <button onClick={() => removeCustomFeature(modId, feat)} className="text-blue-400 hover:text-red-500 ml-2"><TrashIcon className="w-3 h-3"/></button>
+                                                                                <div key={`custom-${idx}`} className="flex items-center justify-between p-2 rounded border bg-bronze-50 border-bronze-200">
+                                                                                    <span className="text-xs text-bronze-800 font-medium leading-tight">{feat}</span>
+                                                                                    <button onClick={() => removeCustomFeature(modId, feat)} className="text-bronze-400 hover:text-red-500 ml-2"><TrashIcon className="w-3 h-3"/></button>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
@@ -962,7 +962,7 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                         <div>
                             <button onClick={() => setStage('intent')} className="text-xs font-bold text-slate-400 hover:text-slate-900 uppercase tracking-widest mb-2 transition-colors">← Back to Intent</button>
                             <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-                                <MatchMakerIcon className="w-8 h-8 text-blue-600" />
+                                <MatchMakerIcon className="w-8 h-8 text-bronze-600" />
                                 Strategic Discovery
                             </h1>
                             <p className="text-sm text-slate-600 mt-1">
