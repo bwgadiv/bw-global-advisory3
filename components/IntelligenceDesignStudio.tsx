@@ -2,9 +2,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ReportParameters, UserProfile, StrategicIntent, SkillLevel } from '../types';
 import { ORGANIZATION_TYPES, STRATEGIC_INTENTS, REGIONS_AND_COUNTRIES, ORGANIZATION_SUBTYPES } from '../constants';
-import { NexusLogo, Target, BrainCircuit, GlobeIcon, Users, FileText, LetterIcon, Layers, CheckCircle, RocketIcon, ShieldCheck, ActivityIcon, ManualIcon, PlusCircleIcon, CloseIcon, SlidersIcon, TrashIcon, MatchMakerIcon } from './Icons';
+import { NexusLogo, Target, BrainCircuit, GlobeIcon, Users, FileText, LetterIcon, Layers, CheckCircle, RocketIcon, ShieldCheck, ActivityIcon, ManualIcon, PlusCircleIcon, CloseIcon, SlidersIcon, TrashIcon, MatchMakerIcon, AnalyzeIcon } from './Icons';
 import { StrategicCanvas } from './StrategicCanvas';
-import { generateFastSuggestion } from '../services/nexusService';
+import { generateFastSuggestion, generateDiscoverySynthesis } from '../services/nexusService';
 import Inquire from './Inquire';
 import MatchmakingEngine from './MatchmakingEngine';
 import PartnerIntelligenceDashboard from './PartnerIntelligenceDashboard';
@@ -244,6 +244,11 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
     const [customFeatures, setCustomFeatures] = useState<Record<string, string[]>>({});
     const [newFeatureInputs, setNewFeatureInputs] = useState<Record<string, string>>({});
 
+    // Discovery State
+    const [discoveryMatches, setDiscoveryMatches] = useState<any[]>([]);
+    const [synthesis, setSynthesis] = useState<string>('');
+    const [synthesisLoading, setSynthesisLoading] = useState(false);
+
     // --- Handlers ---
 
     const handleIdentityComplete = () => {
@@ -388,6 +393,34 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
         if (file) {
             onParamsChange({ ...params, uploadedFileName: file.name, uploadedDocument: true });
         }
+    };
+
+    // Discovery Logic
+    useEffect(() => {
+        if (stage === 'discovery' && discoveryMatches.length > 0 && !synthesis) {
+            setSynthesisLoading(true);
+            generateDiscoverySynthesis(params, discoveryMatches)
+                .then(text => setSynthesis(text))
+                .finally(() => setSynthesisLoading(false));
+        }
+    }, [stage, discoveryMatches, params]);
+
+    const viabilityScore = useMemo(() => {
+        if (discoveryMatches.length === 0) return 0;
+        const bestScore = Math.max(...discoveryMatches.map(m => m.score || 0));
+        return bestScore;
+    }, [discoveryMatches]);
+
+    const getRatingColor = (score: number) => {
+        if (score > 80) return 'bg-green-500';
+        if (score > 50) return 'bg-yellow-500';
+        return 'bg-red-500';
+    };
+
+    const getRatingLabel = (score: number) => {
+        if (score > 80) return 'High Potential (Green)';
+        if (score > 50) return 'Moderate Risk (Amber)';
+        return 'Low Viability (Red)';
     };
 
     // Logic for Org SubTypes
@@ -965,16 +998,22 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                                     <span className="text-xs font-bold text-slate-500">Risk</span>
                                     <span className="text-xs font-bold text-slate-500">Reward</span>
                                 </div>
-                                <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                                <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex relative">
                                     <div className="w-1/3 bg-red-400"></div>
                                     <div className="w-1/3 bg-yellow-400"></div>
                                     <div className="w-1/3 bg-green-500"></div>
+                                    {/* Dynamic indicator */}
+                                    <div 
+                                        className="absolute top-0 bottom-0 w-1 bg-black shadow-sm transition-all duration-1000" 
+                                        style={{ left: `${viabilityScore}%` }}
+                                    ></div>
                                 </div>
-                                <div className="mt-2 flex justify-center">
-                                    <span className="text-xs font-bold px-3 py-1 bg-green-100 text-green-800 rounded-full border border-green-200">High Potential</span>
+                                <div className="mt-3 flex justify-center items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${getRatingColor(viabilityScore)}`}></div>
+                                    <span className="text-xs font-bold text-slate-800">{getRatingLabel(viabilityScore)}</span>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-4 text-center leading-relaxed">
-                                    Preliminary scan suggests high compatibility with {params.region} market dynamics.
+                                <p className="text-xs text-slate-500 mt-2 text-center leading-relaxed">
+                                    Based on {discoveryMatches.length} discovered matches relative to your strategic objectives.
                                 </p>
                             </div>
                         </div>
@@ -990,14 +1029,32 @@ export const IntelligenceDesignStudio: React.FC<DesignStudioProps> = ({
                                     params={params} 
                                     autoRun={true} 
                                     compact={true}
-                                    onMatchesFound={(matches) => {
-                                        // Optional: Could auto-select best match
-                                        console.log("Early matches found:", matches);
-                                    }}
+                                    onMatchesFound={(matches) => setDiscoveryMatches(matches)}
                                 />
                             </div>
                         </div>
                     </div>
+
+                    {/* Synthesis Section (New) */}
+                    {discoveryMatches.length > 0 && (
+                        <div className="bg-slate-900 rounded-xl shadow-lg p-6 animate-fade-in border border-slate-800">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-white/10 rounded-lg">
+                                    <AnalyzeIcon className="w-5 h-5 text-orange-500" />
+                                </div>
+                                <h3 className="text-lg font-bold text-white">Early Strategic Synthesis</h3>
+                            </div>
+                            <div className="text-sm text-slate-300 leading-relaxed font-medium">
+                                {synthesisLoading ? (
+                                    <div className="flex items-center gap-2 text-orange-400 animate-pulse">
+                                        <ActivityIcon className="w-4 h-4" /> Synthesizing intelligence vectors...
+                                    </div>
+                                ) : (
+                                    `"${synthesis}"`
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-end pt-6 border-t border-slate-200">
                         <button 

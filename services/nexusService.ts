@@ -642,3 +642,30 @@ export const composeReport = async (modules: string[], params: ReportParameters)
         }, 1500);
     });
 };
+
+export const generateDiscoverySynthesis = async (params: ReportParameters, matches: any[]): Promise<string> => {
+    const matchContext = matches.length > 0 
+        ? `Top opportunities identified: ${matches.slice(0,3).map(m => m.title).join(', ')}.` 
+        : "No specific opportunities identified yet.";
+
+    const prompt = `
+        Act as a Senior Strategic Advisor.
+        Provide a concise (max 50 words) 'Mission Viability Assessment' for:
+        Organization: ${params.organizationType} from ${params.userCountry} targeting ${params.region}.
+        Objective: ${params.problemStatement}.
+        Context: ${matchContext}
+        
+        Verdict on strategic fit and potential risks.
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
+        return response.text || "Assessment pending detailed analysis.";
+    } catch (e) {
+        console.error("Synthesis Error", e);
+        return "Strategic assessment unavailable.";
+    }
+};

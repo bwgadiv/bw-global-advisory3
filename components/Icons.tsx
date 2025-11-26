@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const GenericIcon = ({ className, d }: { className?: string, d: string }) => (
@@ -7,7 +8,7 @@ const GenericIcon = ({ className, d }: { className?: string, d: string }) => (
 // Core Brand & UI Icons
 export const NexusLogo = ({ className }: { className?: string }) => <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z" /></svg>;
 export const GlobeIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />;
-export const LayoutDashboardIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 01-1 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />;
+export const LayoutDashboardIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 01-1 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />;
 export const ActivityIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M13 10V3L4 14h7v7l9-11h-7z" />;
 export const CloseIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M6 18L18 6M6 6l12 12" />;
 export const PlusCircleIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />;
@@ -54,6 +55,7 @@ export const TruckIcon = ({ className }: { className?: string }) => <GenericIcon
 export const FlagIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M3 21v-8a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5-5 5H3z" />;
 export const LetterIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />;
 export const CheckCircleIcon = CheckCircle;
+export const LockIcon = ({ className }: { className?: string }) => <GenericIcon className={className} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />;
 
 // Placeholder Icons for Personas and Industries to maintain compatibility
 export const MissionIcon = Target;
